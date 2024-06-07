@@ -10,10 +10,23 @@ function eval_expr(env, ast) {
 
 	const functions = new Map;
 	functions.set('sqrt', function(args) {
+		if (args.length != 1) throw TypeError('sqrt takes exactly one argument');
 		const val = convert_to_double(args[0]).val;
 		const res = Math.sqrt(val);
 		return Value.Double(res);
 	});
+
+	const methods = new Map;
+
+	{
+		const vector_methods = new Map;
+		vector_methods.set('push_back', function(obj, args) {
+			if (args.length != 1) throw TypeError('vector<T>::push_back takes exactly one argument');
+			obj.data.push(args[0]);
+			return Value.Void();
+		});
+		methods.set('vector', vector_methods);
+	}
 
 	return eval(ast);
 
@@ -56,13 +69,11 @@ function eval_expr(env, ast) {
 		case 'method-call': {
 			const obj = eval(ast.target);
 			const args = ast.args.map(x => eval(x));
-			if (obj.type === 'vector' && ast.name === 'push_back') {
-				if (args.length != 1) throw TypeError('vector<T>::push_back takes exactly one argument');
-				obj.data.push(args[0]);
-				return Value.Void();
-			} else {
-				throw TypeError(`Tried to call method '${ast.name}' on oject of type '${obj.type}'`);
-			}
+			const obj_methods = methods.get(obj.type);
+			if (!obj_methods) throw TypeError(`Type '${obj.type}' does not have any methods`);
+			const method = obj_methods.get(ast.name);
+			if (!method) throw TypeError(`Type '${obj.type}' does not have a method named '${ast.name}'`);
+			return method(obj, args);
 		} break;
 		default:
 			throw TypeError(`invalid AST type '${ast.tag}'`);
