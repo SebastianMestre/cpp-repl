@@ -6,6 +6,11 @@ function parse(str) {
 	binops.set('*', { op: Ast.Mul, prec: 1 });
 	binops.set('/', { op: Ast.Div, prec: 1 });
 
+	const variable_starters = new Set('abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+	const variable_chars = new Set('abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
+	const digits = new Set('0123456789');
+	const spaces = new Set(' \t\n');
+
 	let cursor = 0;
 
 	return parse_expr();
@@ -69,6 +74,11 @@ function parse(str) {
 		return Ast.Int(x);
 	}
 
+	function parse_variable() {
+		const name = parse_variable_string();
+		return Ast.Var(name);
+	}
+
 	function parse_variable_string() {
 		skip_whitespace();
 		guard_eof();
@@ -79,39 +89,6 @@ function parse(str) {
 		return str.slice(start, cursor);
 	}
 
-	function parse_variable() {
-		const name = parse_variable_string();
-		return Ast.Var(name);
-	}
-
-	function guard_eof() {
-		if (eof()) syntax_error();
-	}
-
-	function eof() {
-		return cursor == str.length;
-	}
-
-	function skip_whitespace() {
-		while (!eof() && is_space(str[cursor])) cursor++;
-	}
-
-	function is_digit(c) {
-		return '0123456789'.split('').includes(c);
-	}
-
-	function is_variable_char(c) {
-		return 'abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('').includes(c);
-	}
-
-	function is_variable_starter(c) {
-		return 'abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').includes(c);
-	}
-
-	function is_space(c) {
-		return ' \t\n'.split('').includes(c);
-	}
-
 	function eat(c) {
 		if (!eof() && str[cursor] == c) {
 			cursor++;
@@ -120,8 +97,22 @@ function parse(str) {
 		return false;
 	}
 
-	function syntax_error() {
-		throw RangeError("syntax error!");
+	function skip_whitespace() {
+		while (!eof() && is_space(str[cursor])) cursor++;
 	}
+
+	function guard_eof() { if (eof()) syntax_error(); }
+
+	function eof() { return cursor == str.length; }
+
+	function is_digit(c) { return digits.has(c); }
+
+	function is_variable_char(c) { return variable_chars.has(c); }
+
+	function is_variable_starter(c) { return variable_starters.has(c); }
+
+	function is_space(c) { return spaces.has(c); }
+
+	function syntax_error() { throw RangeError("syntax error!"); }
 
 }
