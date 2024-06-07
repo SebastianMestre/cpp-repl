@@ -9,6 +9,19 @@ function parse(str) {
 		while (true) {
 			skip_whitespace();
 			if (eof()) break;
+			if (str[cursor] == '.') {
+				cursor++;
+				const name = parse_variable_string();
+				skip_whitespace();
+				if (str[cursor] != '(') syntax_error();
+				cursor++;
+				const arg = parse_expr();
+				skip_whitespace();
+				if (str[cursor] != ')') syntax_error();
+				cursor++;
+				lhs = Ast.MethodCall(lhs, name, [arg]);
+				continue;
+			}
 			const op = get_binop(str[cursor]);
 			if (!op) break;
 			cursor++;
@@ -36,7 +49,7 @@ function parse(str) {
 		}
 		if (is_digit(str[cursor])) return parse_int();
 		if (is_variable_starter(str[cursor])) return parse_variable();
-		throw RangeError("syntax error!");
+		syntax_error();
 	}
 
 	function parse_int() {
@@ -51,19 +64,23 @@ function parse(str) {
 		return Ast.Int(x);
 	}
 
-	function parse_variable() {
+	function parse_variable_string() {
 		skip_whitespace();
 		guard_eof();
-		if (!is_variable_starter(str[cursor])) throw RangeError("syntax error!");
+		if (!is_variable_starter(str[cursor])) syntax_error();
 		const start = cursor;
 		while (!eof() && is_variable_char(str[cursor]))
 			cursor++;
-		const name = str.slice(start, cursor);
+		return str.slice(start, cursor);
+	}
+
+	function parse_variable() {
+		const name = parse_variable_string();
 		return Ast.Var(name);
 	}
 
 	function guard_eof() {
-		if (eof()) throw RangeError("syntax error!");
+		if (eof()) syntax_error();
 	}
 
 	function eof() {
@@ -88,6 +105,10 @@ function parse(str) {
 
 	function is_space(c) {
 		return ' \t\n'.split('').includes(c);
+	}
+
+	function syntax_error() {
+		throw RangeError("syntax error!");
 	}
 
 }
