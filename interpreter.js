@@ -21,9 +21,19 @@ function eval_expr(env, ast) {
 	{
 		const vector_methods = new Map;
 		vector_methods.set('push_back', function(obj, args) {
-			if (args.length != 1) throw TypeError('vector<T>::push_back takes exactly one argument');
+			if (args.length != 1) throw TypeError('vector::push_back takes exactly one argument');
 			obj.data.push(args[0]);
 			return Value.Void();
+		});
+		vector_methods.set('back', function(obj, args) {
+			if (args.length != 0) throw TypeError('vector::back takes zero arguments');
+			if (obj.data.length == 0) throw TypeError('Called vector::back on an empty vector');
+			return obj.data[obj.data.length - 1];
+		});
+		vector_methods.set('operator[]', function(obj, args) {
+			if (args.length != 1) throw TypeError('vector::operator[] takes exactly one argument');
+			if (args[0].type != 'int') throw TypeError('vector::operator[] takes an int argument');
+			return obj.data[args[0].val];
 		});
 		methods.set('vector', vector_methods);
 	}
