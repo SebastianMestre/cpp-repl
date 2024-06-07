@@ -16,16 +16,13 @@ function parse(str) {
 			skip_whitespace();
 			if (eof()) break;
 
-			if (str[cursor] == '.') {
-				cursor++;
+			if (eat('.')) {
 				const name = parse_variable_string();
 				skip_whitespace();
-				if (str[cursor] != '(') syntax_error();
-				cursor++;
+				if (!eat('(')) syntax_error();
 				const arg = parse_expr();
 				skip_whitespace();
-				if (str[cursor] != ')') syntax_error();
-				cursor++;
+				if (!eat(')')) syntax_error();
 				lhs = Ast.MethodCall(lhs, name, [arg]);
 				continue;
 			}
@@ -45,8 +42,7 @@ function parse(str) {
 	function parse_simple_expr() {
 		skip_whitespace();
 		guard_eof();
-		if (str[cursor] == '-') {
-			cursor++;
+		if (eat('-')) {
 			const expr = parse_simple_expr();
 			return Ast.Minus(expr);
 		}
@@ -108,6 +104,14 @@ function parse(str) {
 
 	function is_space(c) {
 		return ' \t\n'.split('').includes(c);
+	}
+
+	function eat(c) {
+		if (!eof() && str[cursor] == c) {
+			cursor++;
+			return true;
+		}
+		return false;
 	}
 
 	function syntax_error() {
