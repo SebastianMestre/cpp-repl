@@ -42,6 +42,12 @@ function parse(str) {
 	function parse_simple_expr() {
 		skip_whitespace();
 		guard_eof();
+		if (eat('(')) {
+			const expr = parse_expr();
+			skip_whitespace();
+			if (!eat(')')) syntax_error();
+			return expr;
+		}
 		if (eat('-')) {
 			const expr = parse_simple_expr();
 			return Ast.Minus(expr);
