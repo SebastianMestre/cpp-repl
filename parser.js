@@ -1,14 +1,21 @@
 
 function parse(str) {
+
+	const binops = new Map();
+	binops.set('+', { op: Ast.Add, prec: 0 });
+	binops.set('*', { op: Ast.Mul, prec: 1 });
+	binops.set('/', { op: Ast.Div, prec: 1 });
+
 	let cursor = 0;
 
 	return parse_expr();
 
-	function parse_expr() {
+	function parse_expr(prec = -1) {
 		let lhs = parse_simple_expr();
 		while (true) {
 			skip_whitespace();
 			if (eof()) break;
+
 			if (str[cursor] == '.') {
 				cursor++;
 				const name = parse_variable_string();
@@ -22,21 +29,17 @@ function parse(str) {
 				lhs = Ast.MethodCall(lhs, name, [arg]);
 				continue;
 			}
-			const op = get_binop(str[cursor]);
-			if (!op) break;
+
+			if (!binops.has(str[cursor])) break;
+			const {op, prec: op_prec} = binops.get(str[cursor]);
+
+			if (op_prec <= prec) break;
+
 			cursor++;
-			const rhs = parse_simple_expr();
+			const rhs = parse_expr(op_prec);
 			lhs = op(lhs, rhs);
 		}
 		return lhs;
-	}
-
-	function get_binop(c) {
-		const binops = new Map();
-		binops.set('+', Ast.Add);
-		binops.set('*', Ast.Mul);
-		binops.set('/', Ast.Div);
-		return binops.get(c);
 	}
 
 	function parse_simple_expr() {
