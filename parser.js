@@ -25,10 +25,15 @@ function parse(str) {
 				const name = parse_variable_string();
 				skip_whitespace();
 				if (!eat('(')) syntax_error();
-				const arg = parse_expr();
-				skip_whitespace();
-				if (!eat(')')) syntax_error();
-				lhs = Ast.MethodCall(lhs, name, [arg]);
+				const args = [];
+				if (!eat(')')) while (true) {
+					args.push(parse_expr());
+					skip_whitespace();
+					if (eat(',')) continue;
+					if (eat(')')) break;
+					syntax_error();
+				}
+				lhs = Ast.MethodCall(lhs, name, args);
 				continue;
 			}
 
