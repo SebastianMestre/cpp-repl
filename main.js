@@ -21,13 +21,26 @@ function compute() {
 
 	console.log(env);
 
+	let ok = true;
 	for (const {input, label} of inputs) {
-		const ast = parse(input.value);
-		console.log(ast);
-		const value = eval_expr(env, ast);
-		console.log(value);
-		console.log(env);
-		label.innerHTML = show(value);
+		if (ok) {
+			try {
+				const ast = parse(input.value);
+				console.log(ast);
+				const value = eval_expr(env, ast);
+				console.log(value);
+				console.log(env);
+				label.innerHTML = show(value);
+				label.style.color = "black";
+			} catch (ex) {
+				label.innerHTML = ex.toString();
+				label.style.color = "red";
+				ok = false;
+			}
+		} else {
+			label.innerHTML = '-';
+			label.style.color = "black";
+		}
 	}
 
 }
