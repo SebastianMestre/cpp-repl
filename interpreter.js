@@ -42,16 +42,24 @@ function eval_expr(env, ast) {
 
 	function eval(ast) {
 		switch (ast.tag) {
+
 		case 'int': {
 			return Value.Int(ast.val);
 		} break;
 		case 'double': {
 			return Value.Double(ast.val);
 		} break;
+
+		case 'var': {
+			if (!env.has(ast.name)) throw RangeError(`Accesed undefined variable '${ast.name}'`);
+			return env.get(ast.name);
+		} break;
+
 		case 'minus': {
 			const inner = eval(ast.expr);
 			return minus(inner);
 		};
+
 		case 'add': {
 			const lhs = eval(ast.lhs);
 			const rhs = eval(ast.rhs);
@@ -67,10 +75,7 @@ function eval_expr(env, ast) {
 			const rhs = eval(ast.rhs);
 			return div(lhs, rhs);
 		} break;
-		case 'var': {
-			if (!env.has(ast.name)) throw RangeError(`Accesed undefined variable '${ast.name}'`);
-			return env.get(ast.name);
-		} break;
+
 		case 'function-call': {
 			const fun = functions.get(ast.name);
 			const args = ast.args.map(x => eval(x));
@@ -79,15 +84,25 @@ function eval_expr(env, ast) {
 		case 'method-call': {
 			const obj = eval(ast.target);
 			const args = ast.args.map(x => eval(x));
-			const obj_methods = methods.get(obj.type);
-			if (!obj_methods) throw TypeError(`Type '${obj.type}' does not have any methods`);
-			const method = obj_methods.get(ast.name);
-			if (!method) throw TypeError(`Type '${obj.type}' does not have a method named '${ast.name}'`);
-			return method(obj, args);
+			return method_call(obj, ast.name, args);
 		} break;
+		case 'indexing': {
+			const obj = eval(ast.target);
+			const idx = eval(ast.idx);
+			return method_call(obj, "operator[]", [idx]);
+		} break;
+
 		default:
 			throw TypeError(`invalid AST type '${ast.tag}'`);
 		}
+	}
+
+	function method_call(obj, name, args) {
+			const obj_methods = methods.get(obj.type);
+			if (!obj_methods) throw TypeError(`Type '${obj.type}' does not have any methods`);
+			const method = obj_methods.get(name);
+			if (!method) throw TypeError(`Type '${obj.type}' does not have a method named '${name}'`);
+			return method(obj, args);
 	}
 
 	function minus(val) {

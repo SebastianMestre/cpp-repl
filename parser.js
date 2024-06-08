@@ -32,6 +32,14 @@ function parse(str) {
 				continue;
 			}
 
+			if (eat('[')) {
+				const idx = parse_expr();
+				skip_whitespace();
+				if (!eat(']')) syntax_error();
+				lhs = Ast.Indexing(lhs, idx);
+				continue;
+			}
+
 			if (!binops.has(str[cursor])) break;
 			const {op, prec: op_prec} = binops.get(str[cursor]);
 
