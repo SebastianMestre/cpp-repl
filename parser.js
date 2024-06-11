@@ -21,6 +21,22 @@ function parse(str) {
 			skip_whitespace();
 			if (eof()) break;
 
+			if (eat('(')) {
+				// FIXME: we only parse function calls where the lhs is a variable
+				if (lhs.tag != 'var') syntax_error();
+				skip_whitespace();
+				const args = [];
+				if (!eat(')')) while (true) {
+					args.push(parse_expr());
+					skip_whitespace();
+					if (eat(',')) continue;
+					if (eat(')')) break;
+					syntax_error();
+				}
+				lhs = Ast.FunctionCall(lhs.name, args);
+				continue;
+			}
+
 			if (eat('.')) {
 				const name = parse_variable_string();
 				skip_whitespace();
