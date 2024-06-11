@@ -100,7 +100,18 @@ function parse(str) {
 			x = x * 10 + d;
 			cursor++;
 		}
-		return Ast.Int(x);
+		if (eat('.')) {
+			let mu = 1.0;
+			while (!eof() && is_digit(str[cursor])) {
+				const d = str.charCodeAt(cursor) - '0'.charCodeAt(0);
+				mu *= 0.1;
+				x += d * mu;
+				cursor++;
+			}
+			return Ast.Double(x);
+		} else {
+			return Ast.Int(x);
+		}
 	}
 
 	function parse_variable() {
