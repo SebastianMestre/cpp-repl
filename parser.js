@@ -21,18 +21,10 @@ function parse(str) {
 			skip_whitespace();
 			if (eof()) break;
 
-			if (eat('(')) {
+			if (match('(')) {
 				// FIXME: we only parse function calls where the lhs is a variable
 				if (lhs.tag != 'var') syntax_error();
-				skip_whitespace();
-				const args = [];
-				if (!eat(')')) while (true) {
-					args.push(parse_expr());
-					skip_whitespace();
-					if (eat(',')) continue;
-					if (eat(')')) break;
-					syntax_error();
-				}
+				const args = parse_argument_list();
 				lhs = Ast.FunctionCall(lhs.name, args);
 				continue;
 			}
@@ -40,15 +32,7 @@ function parse(str) {
 			if (eat('.')) {
 				const name = parse_variable_string();
 				skip_whitespace();
-				if (!eat('(')) syntax_error();
-				const args = [];
-				if (!eat(')')) while (true) {
-					args.push(parse_expr());
-					skip_whitespace();
-					if (eat(',')) continue;
-					if (eat(')')) break;
-					syntax_error();
-				}
+				const args = parse_argument_list();
 				lhs = Ast.MethodCall(lhs, name, args);
 				continue;
 			}
@@ -71,6 +55,20 @@ function parse(str) {
 			lhs = op(lhs, rhs);
 		}
 		return lhs;
+	}
+
+	function parse_argument_list() {
+		skip_whitespace();
+		if (!eat('(')) syntax_error();
+		const args = [];
+		if (!eat(')')) while (true) {
+			args.push(parse_expr());
+			skip_whitespace();
+			if (eat(',')) continue;
+			if (eat(')')) break;
+			syntax_error();
+		}
+		return args;
 	}
 
 	function parse_simple_expr() {
@@ -130,11 +128,15 @@ function parse(str) {
 	}
 
 	function eat(c) {
-		if (!eof() && str[cursor] == c) {
+		if (match(c)) {
 			cursor++;
 			return true;
 		}
 		return false;
+	}
+
+	function match(c) {
+		return !eof() && str[cursor] == c;
 	}
 
 	function skip_whitespace() {
