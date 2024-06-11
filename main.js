@@ -23,7 +23,7 @@ function compute() {
 
 	let ok = true;
 	for (const {input, label} of inputs) {
-		if (ok) {
+		if (ok && input.value.trim() !== "") {
 			try {
 				const ast = parse(input.value);
 				console.log(ast);
@@ -33,6 +33,7 @@ function compute() {
 				label.innerHTML = show(value);
 				label.style.color = "black";
 			} catch (ex) {
+				console.log(ex);
 				label.innerHTML = ex.toString();
 				label.style.color = "red";
 				ok = false;
