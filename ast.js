@@ -8,6 +8,7 @@ const Ast = {
 	Minus(expr) { return { tag: 'minus', expr }; },
 
 	Add(lhs, rhs) { return { tag: 'add', lhs, rhs }; },
+	Sub(lhs, rhs) { return { tag: 'sub', lhs, rhs }; },
 	Mul(lhs, rhs) { return { tag: 'mul', lhs, rhs }; },
 	Div(lhs, rhs) { return { tag: 'div', lhs, rhs }; },
 

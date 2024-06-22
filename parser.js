@@ -3,6 +3,7 @@ function parse(str) {
 
 	const binops = new Map();
 	binops.set('+', { op: Ast.Add, prec: 1 });
+	binops.set('-', { op: Ast.Sub, prec: 1 });
 	binops.set('*', { op: Ast.Mul, prec: 2 });
 	binops.set('/', { op: Ast.Div, prec: 2 });
 	binops.set('=', { op: Ast.Assignment, prec: 0 });

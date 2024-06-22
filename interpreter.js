@@ -70,6 +70,11 @@ function eval_expr(env, ast) {
 			const rhs = eval(ast.rhs);
 			return add(lhs, rhs);
 		} break;
+		case 'sub': {
+			const lhs = eval(ast.lhs);
+			const rhs = eval(ast.rhs);
+			return sub(lhs, rhs);
+		} break;
 		case 'mul': {
 			const lhs = eval(ast.lhs);
 			const rhs = eval(ast.rhs);
@@ -139,6 +144,12 @@ function eval_expr(env, ast) {
 		if (lhs.type == 'int' && rhs.type == 'int') return Value.Int(lhs.val + rhs.val);
 		if (lhs.type == 'double' && rhs.type == 'double') return Value.Double(lhs.val + rhs.val);
 		throw TypeError(`Cannot add '${lhs.type}' and '${rhs.type}'`);
+	}
+
+	function sub(lhs, rhs) {
+		if (lhs.type == 'int' && rhs.type == 'int') return Value.Int(lhs.val - rhs.val);
+		if (lhs.type == 'double' && rhs.type == 'double') return Value.Double(lhs.val - rhs.val);
+		throw TypeError(`Cannot substract '${lhs.type}' and '${rhs.type}'`);
 	}
 
 	function mul(lhs, rhs) {
