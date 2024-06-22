@@ -14,4 +14,6 @@ const Ast = {
 	FunctionCall(name, args) { return { tag: 'function-call', name, args }; },
 	MethodCall(target, name, args) { return { tag: 'method-call', target, name, args }; },
 	Indexing(target, idx) { return { tag: 'indexing', target, idx }; },
+
+	Assignment(target, value) { return { tag: 'assignment', target, value } },
 };

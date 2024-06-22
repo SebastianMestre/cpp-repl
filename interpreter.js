@@ -35,6 +35,11 @@ function eval_expr(env, ast) {
 			if (args[0].type != 'int') throw TypeError('vector::operator[] takes an int argument');
 			return obj.data[args[0].val];
 		});
+		vector_methods.set('operator[]=', function(obj, args) {
+			if (args.length != 2) throw TypeError('vector::operator[]= takes exactly one argument');
+			if (args[0].type != 'int') throw TypeError('vector::operator[]= takes an int argument');
+			return obj.data[args[0].val] = args[1];
+		});
 		methods.set('vector', vector_methods);
 	}
 
@@ -90,6 +95,25 @@ function eval_expr(env, ast) {
 			const obj = eval(ast.target);
 			const idx = eval(ast.idx);
 			return method_call(obj, "operator[]", [idx]);
+		} break;
+
+		case 'assignment': {
+			switch (ast.target.tag) {
+			case 'var': {
+				if (!env.has(ast.target.name)) throw RangeError(`Accesed undefined variable '${ast.name}'`);
+				const value = eval(ast.value);
+				env.set(ast.target.name, value);
+				return value;
+			} break;
+			case 'indexing': {
+				const obj = eval(ast.target.target);
+				const idx = eval(ast.target.idx);
+				const value = eval(ast.value);
+				method_call(obj, "operator[]=", [idx, value]);
+				return value;
+			} break;
+			default: throw TypeError(`Target of assignment is not an lvalue`);
+			}
 		} break;
 
 		default:

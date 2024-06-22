@@ -2,9 +2,10 @@
 function parse(str) {
 
 	const binops = new Map();
-	binops.set('+', { op: Ast.Add, prec: 0 });
-	binops.set('*', { op: Ast.Mul, prec: 1 });
-	binops.set('/', { op: Ast.Div, prec: 1 });
+	binops.set('+', { op: Ast.Add, prec: 1 });
+	binops.set('*', { op: Ast.Mul, prec: 2 });
+	binops.set('/', { op: Ast.Div, prec: 2 });
+	binops.set('=', { op: Ast.Assignment, prec: 0 });
 
 	const variable_starters = new Set('abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ');
 	const variable_chars = new Set('abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
